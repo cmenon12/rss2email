@@ -137,8 +137,8 @@ def get_message(sender, recipient, subject, body, content_type,
 
     # Create the message ('plain' stands for Content-Type: text/plain)
     message = _MIMEText(body, content_type, body_encoding)
-    message['From'] = _formataddr((sender_name, sender_addr))
-    message['To'] = ', '.join(recipient_list)
+    message['From'] = config.get(section, 'from')
+    message['To'] = config.get(section, 'to')
     message['Subject'] = _Header(subject, subject_encoding)
     if config.getboolean(section, 'use-8bit'):
         del message['Content-Transfer-Encoding']
