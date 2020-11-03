@@ -836,9 +836,17 @@ class Feed (object):
             lines.extend([
                     '</div>',  # /footer
                     '</div>',  # /entry
-                    '</body>',
-                    '</html>',
-                    ''])
+                    ])
+
+            lines.append('<br><span class="disclaimer">This email was sent '
+                         'automatically by a computer program (rss2email). '
+                         'If you want to leave some feedback then please '
+                         'reply directly to it.</span><br><br>')
+
+            lines.extend([
+                '</body>',
+                '</html>',
+                ''])
             content['type'] = 'text/html'
             content['value'] = '\n'.join(lines)
             return content
