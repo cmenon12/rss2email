@@ -154,7 +154,7 @@ def download_article(url: str, title: str) -> Tuple[MIMEBase, MIMEBase]:
     return html_part, pdf_part
 
 
-def get_message(sender, recipient, subject, body, content_type,
+def get_message(sender, recipient, subject, body, content_type, url,
                 extra_headers=None, config=None, section='DEFAULT'):
     """Generate a `Message` instance.
 
@@ -203,11 +203,16 @@ def get_message(sender, recipient, subject, body, content_type,
     subject_encoding = guess_encoding(subject, encodings)
     body_encoding = guess_encoding(body, encodings)
 
-    # Create the message ('plain' stands for Content-Type: text/plain)
-    message = _MIMEText(body, content_type, body_encoding)
+    # Create the message
+    message = MIMEMultipart("alternative")
+    body = _MIMEText(body, content_type, body_encoding)
+    message.attach(body)
     message['From'] = config.get(section, 'from')
     message['To'] = config.get(section, 'to')
     message['Subject'] = _Header(subject, subject_encoding)
+    for attachment in download_article(url, subject):
+        message.attach(attachment)
+
     if config.getboolean(section, 'use-8bit'):
         del message['Content-Transfer-Encoding']
         charset = _Charset(body_encoding)

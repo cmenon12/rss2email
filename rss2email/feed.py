@@ -552,6 +552,7 @@ class Feed (object):
             subject=subject,
             body=content['value'],
             content_type=content['type'].split('/', 1)[1],
+            url=self._get_entry_link(entry),
             extra_headers=extra_headers,
             config=self.config,
             section=self.section)
