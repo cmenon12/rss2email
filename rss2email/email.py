@@ -55,8 +55,11 @@ import subprocess as _subprocess
 import sys as _sys
 import time as _time
 import os as _os
+import datetime
+import pdfkit
 
 import html2text
+import requests
 
 from . import LOG as _LOG
 from . import config as _config
@@ -112,6 +115,23 @@ def message_add_plain_multipart(guid, message, html):
                 )
         return message
     return message
+
+
+def download_article(url: str):
+    """Download the URL and return the HTML and PDF."""
+
+    # Get the HTML and PDF
+    html = requests.get(url, allow_redirects=True)
+    my_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+    pdf_options = {
+        "page-size": "A4",
+        "no-pdf-compression": "",
+        "header-left": "[title]",
+        "header-right": "Page [page] of [toPage]",
+        "footer-left": url,
+        "footer-right": f"[date] [time] {str(my_tz)}"
+    }
+    pdf = pdfkit.from_url(url, False)
 
 def get_message(sender, recipient, subject, body, content_type,
                 extra_headers=None, config=None, section='DEFAULT'):
