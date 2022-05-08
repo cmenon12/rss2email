@@ -35,11 +35,13 @@
 """
 
 import email as _email
+from email import encoders
 from email.charset import Charset as _Charset
 import email.encoders as _email_encoders
 from email.generator import BytesGenerator as _BytesGenerator
 import email.header as _email_header
 from email.header import Header as _Header
+from email.mime.base import MIMEBase
 from email.mime.text import MIMEText as _MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.utils import formataddr as _formataddr
@@ -56,6 +58,8 @@ import sys as _sys
 import time as _time
 import os as _os
 import datetime
+from typing import Tuple
+
 import pdfkit
 
 import html2text
@@ -117,21 +121,38 @@ def message_add_plain_multipart(guid, message, html):
     return message
 
 
-def download_article(url: str):
+def download_article(url: str, title: str) -> Tuple[MIMEBase, MIMEBase]:
     """Download the URL and return the HTML and PDF."""
 
     # Get the HTML and PDF
-    html = requests.get(url, allow_redirects=True)
+    html_response = requests.get(url, allow_redirects=True)
+    html_response.raise_for_status()
     my_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
     pdf_options = {
         "page-size": "A4",
-        "no-pdf-compression": "",
         "header-left": "[title]",
         "header-right": "Page [page] of [toPage]",
         "footer-left": url,
         "footer-right": f"[date] [time] {str(my_tz)}"
     }
     pdf = pdfkit.from_url(url, False)
+
+    # Convert HTML to an attachment
+    html_part = MIMEBase('application', "octet-stream")
+    html_part.set_payload(html_response.content)
+    encoders.encode_base64(html_part)
+    html_part.add_header("Content-Disposition", f"attachment; filename=\"{title}\".html")
+    html_part.add_header("Content-Description", f"{title}.html")
+
+    # Convert PDF to an attachment
+    pdf_part = MIMEBase("application", "pdf")
+    pdf_part.set_payload(pdf)
+    encoders.encode_base64(pdf_part)
+    pdf_part.add_header("Content-Disposition", f"attachment; filename=\"{title}\".pdf")
+    pdf_part.add_header("Content-Description", f"{title}.pdf")
+
+    return html_part, pdf_part
+
 
 def get_message(sender, recipient, subject, body, content_type,
                 extra_headers=None, config=None, section='DEFAULT'):
