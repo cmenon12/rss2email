@@ -1,12 +1,37 @@
 UNRELEASED
+    * New argument `--only-new` on the `add` command to ignore entries in feed
+      when added, so only new entries will be sent.
+    * Fix crash on html-mail entries with no URL
+    * Fix exception when parsing a feed with a linebreak in its title
+    * Add a new `subject-format` setting, customise the subject line
+    * Removed '$' interpolation in config file to allow URLs containing dollar signs. Interpolation was not fully supported, and the placeholder would not survive a second save. Config files with ${...} placeholders will need to be manually edited after upgrading, or a save forced by adding and removing a fake feed before upgrading.
+
+v3.13 (2021-04-03)
+    * Switch to feedparser 6
+    * Switch to poetry instead of requirements.txt
+    * Make the `verbose` flag in the config file actually have an impact, and have it default to `info
     * Improve log messages
     * Remove documentation of `smtp-ssl-protocol` as this option was dropped in 2016
     * Stop forging SMTP and sendmail envelope sender (#134)
     * Add sendmail_config option
-    * Fix verbose configuration setting
     * Upgraded to feedparser v6.0 (https://github.com/kurtmckee/feedparser/)
-    * Drop support for Python 3.5
+    * Drop support for Python 3.5, add support for Python 3.9
     * Log sendmail output
+    * Support multipart/alternative emails with both HTML and plain text parts with option `multipart-html`
+    * Add inline-links option, allowing links to be sent to the bottom of the
+      paragraph
+    * Add wrap-links option, preventing links from be wrapped over multiple lines
+    * Stop looking in $XDG_DATA_DIRS for the database, and only look in
+      $XDG_DATA_HOME
+    * Warnings about HTTP content-type being unexpected now properly display
+    * Make the proxy parameter also affect https connections
+    * Add a --clean argument on the run command to reduce the database size
+    * Set body element attribute dir=auto in HTML mail
+    * Store the lock file in XDG_RUNTIME_DIR instead of /tmp
+
+v3.12.3 (2021-03-19)
+    * Make dependency on feedparser have an upper bound so that `pip install`
+      works again
 
 v3.12.2 (2020-08-31)
     * Fix bug `AttributeError: 'NoneType' object has no attribute 'close'` (#126)

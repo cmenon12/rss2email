@@ -1,7 +1,9 @@
-# Copyright (C) 2012-2020 Etienne Millon <me@emillon.org>
+# Copyright (C) 2012-2021 Etienne Millon <me@emillon.org>
 #                         Léo Gaspard <leo@gaspard.io>
 #                         Profpatsch <mail@profpatsch.de>
 #                         W. Trevor King <wking@tremily.us>
+#                         auouymous <5005204+auouymous@users.noreply.github.com>
+#                         ryneeverett <ryneeverett@gmail.com>
 #
 # This file is part of rss2email.
 #
@@ -216,13 +218,13 @@ class DataFileError (FeedsError):
     def __init__(self, feeds, message=None):
         if message is None:
             message = 'problem with the feed data file {}'.format(
-                feeds.datafile)
+                feeds.datafile_path)
         super(DataFileError, self).__init__(feeds=feeds, message=message)
 
 
 class NoDataFile (DataFileError):
     def __init__(self, feeds):
-        message = 'feed data file {} does not exist'.format(feeds.datafile)
+        message = 'feed data file {} does not exist'.format(feeds.datafile_path)
         super(NoDataFile, self).__init__(feeds=feeds, message=message)
 
     def log(self):

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2004-2020 Aaron Swartz
+# Copyright (C) 2004-2021 Aaron Swartz
+#                         Amir Yalon <105565+amiryal@users.noreply.github.com>
+#                         Amir Yalon <git@please.nospammail.net>
 #                         Anders Damsgaard <anders@adamsgaard.dk>
 #                         Andrey Zelenchuk <azelenchuk@parallels.com>
 #                         Andrey Zelenchuk <azelenchuk@plesk.com>
@@ -22,10 +24,13 @@
 #                         Marcel Ackermann
 #                         Martin 'Joey' Schulze
 #                         Martin Monperrus <monperrus@users.noreply.github.com>
+#                         Martin Vietz <git@martin.vietz.eu>
 #                         Matej Cepl
 #                         Notkea <pacien@users.noreply.github.com>
 #                         Profpatsch <mail@profpatsch.de>
 #                         W. Trevor King <wking@tremily.us>
+#                         auouymous <5005204+auouymous@users.noreply.github.com>
+#                         auouymous <au@qzx.com>
 #                         shan3141 <xpoh434@users.noreply.github.com>
 #
 # This file is part of rss2email.
@@ -45,12 +50,15 @@
 """Define the ``Feed`` class for handling a single feed
 """
 
+import calendar as _calendar
 import collections as _collections
 import platform
 from email.message import Message
 from email.mime.message import MIMEMessage as _MIMEMessage
 from email.mime.multipart import MIMEMultipart as _MIMEMultipart
 from email.utils import formataddr as _formataddr
+from email.utils import formatdate as _formatdate
+from email.utils import parseaddr as _parseaddr
 import hashlib as _hashlib
 import html.parser as _html_parser
 import re as _re
@@ -372,7 +380,9 @@ class Feed (object):
         timeout = config.getint('feed-timeout')
         kwargs = {}
         if proxy:
-            kwargs['handlers'] = [_urllib_request.ProxyHandler({'http':proxy})]
+            kwargs['handlers'] = [
+                _urllib_request.ProxyHandler({ 'http': proxy, 'https': proxy })
+            ]
         f = _util.TimeLimitedFunction('feed {}'.format(self.name), timeout, _feedparser.parse)
         return f(self.url, self.etag, modified=self.modified, **kwargs)
 
@@ -402,9 +412,11 @@ class Feed (object):
             self.url = parsed['url']
         elif status not in [200, 302, 304, 307]:
             raise _error.HTTPError(status=status, feed=self)
+
         http_headers = parsed.get('headers', {})
         if http_headers:
             _LOG.debug('HTTP headers: {}'.format(http_headers))
+            http_headers = dict((k.lower(), v) for k, v in http_headers.items())
         if not http_headers:
             _LOG.warning('could not get HTTP headers: {}'.format(self))
             warned = True
@@ -483,6 +495,8 @@ class Feed (object):
             new_state = {} # type: Dict[str, Any]
         else:
             _LOG.debug('already seen {}'.format(guid))
+            if 'old' in old_state:
+                del old_state['old']
             if self.reply_changes:
                 if new_hash != old_state.get('hash'):
                     _LOG.debug('hash changed for {}'.format(guid))
@@ -495,7 +509,7 @@ class Feed (object):
         new_state['hash'] = new_hash
 
         sender = self._get_entry_email(parsed=parsed, entry=entry)
-        subject = self._get_entry_title(entry)
+        subject = self._get_entry_subject(entry=entry)
 
         message_id = '<{0}@{1}>'.format(_uuid.uuid4(), platform.node())
         in_reply_to = old_state.get('message_id') if old_state is not None else None
@@ -602,7 +616,7 @@ class Feed (object):
                 if entry.get(kind, None):
                     datetime = entry[kind]
                     break
-        return _time.strftime("%a, %d %b %Y %H:%M:%S -0000", datetime)
+        return _formatdate(_calendar.timegm(datetime))
 
     def _get_entry_name(self, parsed, entry):
         """Get the best name
@@ -654,6 +668,17 @@ class Feed (object):
         if 'name' in feed.get('publisher_detail', []):
             data['publisher'] = feed.publisher_detail.name
         name = self.name_format.format(**data)
+        name = name.replace('\n', ' ').strip()
+        return _html.unescape(name)
+
+    def _get_entry_subject(self, entry):
+        data = {
+            'feed': self,
+            'feed-name': self.name,
+            'feed-url': self.url,
+            'feed-title': self._get_entry_title(entry),
+            }
+        name = self.subject_format.format(**data)
         return _html.unescape(name)
 
     def _validate_email(self, email, default=None):
@@ -796,43 +821,50 @@ class Feed (object):
             if self.use_css and self.css:
                 lines.extend([
                         '    <style type="text/css">',
-                        self.css,
+                        _saxutils.escape(self.css),
                         '    </style>',
                         ])
+            # For backward compatibility, specify "body" and "entry"
+            # as both class and id.  Unlike the other elements
+            # (header, footer) they were used as ids, not classes,
+            # which was inconsistent as well as problemmatic
+            # in the config file (# is a comment character).
             lines.extend([
                     '</head>',
-                    '<body>',
-                    '<div id="entry">',
+                    '<body dir="auto">',
+                    '<div class="entry" id="entry">',
                     '<h1 class="header"><a href="{}">{}</a></h1>'.format(
-                        link, subject),
-                    '<div id="body">',
+                        _saxutils.escape(link) if link else '',
+                        _saxutils.escape(subject)),
+                    '<div class="body" id="body">',
                     ])
             if content['type'] in ('text/html', 'application/xhtml+xml'):
                 lines.append(content['value'].strip())
             else:
                 lines.append(_saxutils.escape(content['value'].strip()))
             lines.append('</div>')
-            lines.extend([
-                    '<div class="footer">'
-                    '<p>URL: <a href="{0}">{0}</a></p>'.format(link),
-                    ])
+            lines.append('<div class="footer">')
+            if link:
+                lines.append(
+                    '<p>URL: <a href="{0}">{0}</a></p>'.format(
+                        _saxutils.escape(link)))
             for enclosure in getattr(entry, 'enclosures', []):
                 if getattr(enclosure, 'url', None):
                     lines.append(
                         '<p>Enclosure: <a href="{0}">{0}</a></p>'.format(
-                            enclosure.url))
+                            _saxutils.escape(enclosure.url)))
                 if getattr(enclosure, 'src', None):
                     lines.append(
                         '<p>Enclosure: <a href="{0}">{0}</a></p>'.format(
-                            enclosure.src))
+                            _saxutils.escape(enclosure.src)))
                     lines.append(
-                        '<p><img src="{}" /></p>'.format(enclosure.src))
+                        '<p><img src="{}" /></p>'.format(_saxutils.escape(enclosure.src)))
             for elink in getattr(entry, 'links', []):
                 if elink.get('rel', None) == 'via':
                     url = elink['href']
                     title = elink.get('title', url)
                     lines.append('<p>Via <a href="{}">{}</a></p>'.format(
-                            url, title))
+                            _saxutils.escape(url), _saxutils.escape(title)))
             lines.extend([
                     '</div>',  # /footer
                     '</div>',  # /entry
@@ -885,7 +917,7 @@ class Feed (object):
         _email.send(recipient=self.to, message=message,
                     config=self.config, section=section)
 
-    def run(self, send=True):
+    def run(self, send=True, clean=False):
         """Fetch and process the feed, mailing entry emails.
 
         >>> feed = Feed(
@@ -900,7 +932,14 @@ class Feed (object):
         """
         if not self.to:
             raise _error.NoToEmailAddress(feed=self)
+        if clean:
+            self.etag = None
+            self.modified = None
         parsed = self._fetch()
+
+        if clean and len(parsed.entries) > 0:
+            for guid in self.seen:
+                self.seen[guid]['old'] = True
 
         if self.digest:
             digest = self._new_digest()
@@ -930,9 +969,38 @@ class Feed (object):
         self.etag = parsed.get('etag', None)
         self.modified = parsed.get('modified', None)
 
+        if clean and len(parsed.entries) > 0:
+            # A feed might only show the newest N entries, but if the feed
+            # author deletes a new entry, an older entry will reappear. Deleting
+            # all entries not in the feed could cause an old entry to be resent.
+            # To avoid this, the three newest entries no longer in the feed are
+            # kept, allowing up to three new entries to be deleted from the feed
+            # before anything would be resent.
+
+            # Entries from new feeds are added oldest to newest, and new entries
+            # are always inserted at the end. Entries no longer in the feed will
+            # have an 'old' key added above. This iterates over the entry keys
+            # (guid) from last to first, ignoring entries still in the feed. The
+            # three newest 'old' entries are skipped and all others are deleting.
+
+            # Python 3.7 guarantees Dict insertion order and CPython has done so
+            # since 3.5. It is unlikely older and other implementations would
+            # have stored the entries out-of-order, but if they did, the three
+            # entries kept won't be correct. And in the unlikely event the feed
+            # author deletes an entry, an old entry could be resent.
+
+            old = 3
+            for guid in reversed(list(self.seen)):
+                if 'old' in self.seen[guid]:
+                    if old > 0:
+                        del self.seen[guid]['old']
+                    else:
+                        del self.seen[guid]
+                    old = old - 1
+
     def _new_digest(self):
         digest = _MIMEMultipart('digest')
-        digest['To'] = self.to  # TODO: _Header(), _formataddr((recipient_name, recipient_addr))
+        digest['To'] = _formataddr(_parseaddr(self.to))  # Encodes with utf-8 as necessary
         digest['Subject'] = 'digest for {}'.format(self.name)
         digest['Message-ID'] = '<{0}@{1}>'.format(_uuid.uuid4(), platform.node())
         digest['User-Agent'] = self.user_agent
@@ -953,7 +1021,7 @@ class Feed (object):
         payload.  We assume that this part exists.  If you don't have
         any messages in the digest, don't call this function.
         """
-        digest['From'] = sender  # TODO: _Header(), _formataddr()...
+        digest['From'] = sender
         last_part = digest.get_payload()[-1]
         last_message = last_part.get_payload()[0]
         digest['Date'] = last_message['Date']

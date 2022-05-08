@@ -1,10 +1,13 @@
-# Copyright (C) 2012-2020 Andrey Zelenchuk <azelenchuk@parallels.com>
+# Copyright (C) 2012-2021 Andrey Zelenchuk <azelenchuk@parallels.com>
 #                         Andrey Zelenchuk <azelenchuk@plesk.com>
 #                         Gregory Soutade <gregory@soutade.fr>
 #                         Kaashif Hymabaccus <kaashif@kaashif.co.uk>
+#                         Lucas <lucas@sexy.is>
 #                         Léo Gaspard <leo@gaspard.io>
 #                         Profpatsch <mail@profpatsch.de>
 #                         W. Trevor King <wking@tremily.us>
+#                         auouymous <5005204+auouymous@users.noreply.github.com>
+#                         ryneeverett <ryneeverett@gmail.com>
 #
 # This file is part of rss2email.
 #
@@ -95,6 +98,9 @@ def run(*args, **kwargs):
     add_parser.add_argument(
         'email', nargs='?',
         help='target email for the new feed')
+    add_parser.add_argument(
+        '--only-new', action='store_true',
+        help="entries in the feed now will not be sent")
 
     run_parser = subparsers.add_parser(
         'run', help=_command.run.__doc__.splitlines()[0])
@@ -103,6 +109,9 @@ def run(*args, **kwargs):
         '-n', '--no-send', dest='send',
         default=True, action='store_const', const=False,
         help="fetch feeds, but don't send email")
+    run_parser.add_argument(
+        '--clean', action='store_true',
+        help='clean old feed entries')
     run_parser.add_argument(
         'index', nargs='*',
         help='feeds to fetch (defaults to fetching all feeds)')
@@ -197,6 +206,8 @@ def run(*args, **kwargs):
             raise  # don't mask the traceback
         _sys.exit(1)
     finally:
+        if feeds is not None:
+            feeds.close()
         if lockfile is not None:
             lockfile.close()
 

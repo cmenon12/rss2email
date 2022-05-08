@@ -1,4 +1,4 @@
-# Copyright (C) 2004-2020 Aaron Swartz
+# Copyright (C) 2004-2021 Aaron Swartz
 #                         Andrey Zelenchuk <azelenchuk@parallels.com>
 #                         Andrey Zelenchuk <azelenchuk@plesk.com>
 #                         Brian Lalor
@@ -15,6 +15,7 @@
 #                         Profpatsch <mail@profpatsch.de>
 #                         Raphaël Droz <raphael.droz+floss@gmail.com>
 #                         W. Trevor King <wking@tremily.us>
+#                         ryneeverett <ryneeverett@gmail.com>
 #
 # This file is part of rss2email.
 #
@@ -109,7 +110,7 @@ class Feeds (list):
     Tweak the feed configuration and save.
 
     >>> feeds[0].to = None
-    >>> feeds.save()
+    >>> feeds.save_config()
     >>> print(open(configfile, 'r').read().rstrip('\\n'))
     ... # doctest: +REPORT_UDIFF, +ELLIPSIS
     [DEFAULT]
@@ -220,21 +221,7 @@ class Feeds (list):
         data_home = _os.environ.get(
             'XDG_DATA_HOME',
             _os.path.expanduser(_os.path.join('~', '.local', 'share')))
-        data_dirs = [data_home]
-        data_dirs.extend(
-            _os.environ.get(
-                'XDG_DATA_DIRS',
-                ':'.join([
-                        _os.path.join(ROOT_PATH, 'usr', 'local', 'share'),
-                        _os.path.join(ROOT_PATH, 'usr', 'share'),
-                        ]),
-                ).split(':'))
-        datafiles = [_os.path.join(data_dir, 'rss2email.json')
-                     for data_dir in data_dirs]
-        for datafile in datafiles:
-            if _os.path.isfile(datafile):
-                return datafile
-        return datafiles[0]
+        return _os.path.join(data_home, 'rss2email.json')
 
     def load(self, require=False):
         _LOG.debug('load feed configuration from {}'.format(self.configfiles))
@@ -311,6 +298,11 @@ class Feeds (list):
             return order[feed.name]
         self.sort(key=key)
 
+    def close(self):
+        if self.datafile is not None:
+            self.datafile.close()
+            self.datafile = None
+
     def _load_pickled_data(self, stream):
         _LOG.info('try and load data file using Pickle')
         with open(self.datafile_path, 'rb') as f:
@@ -332,7 +324,7 @@ class Feeds (list):
             'cannot convert data file from version {} to {}'.format(
                 version, self.datafile_version))
 
-    def save(self):
+    def save_config(self):
         dst_config_file = _os.path.realpath(self.configfiles[-1])
         _LOG.debug('save feed configuration to {}'.format(dst_config_file))
         for feed in self:
@@ -346,9 +338,8 @@ class Feeds (list):
             f.flush()
             _os.fsync(f.fileno())
         _os.replace(tmpfile, dst_config_file)
-        self._save_feeds()
 
-    def _save_feeds(self):
+    def save_feeds(self):
         _LOG.debug('save feed data to {}'.format(self.datafile_path))
         dirname = _os.path.dirname(self.datafile_path)
         if dirname and not _os.path.isdir(dirname):
@@ -361,14 +352,10 @@ class Feeds (list):
         if UNIX:
             # Replace the file, then release the lock by closing the old one.
             _os.replace(tmpfile, self.datafile_path)
-            if self.datafile is not None:
-                self.datafile.close()  # release the lock
-                self.datafile = None
+            self.close()  # release the lock
         else:
             # On Windows we cannot replace the file while it is opened. And we have no lock.
-            if self.datafile is not None:
-                self.datafile.close()
-                self.datafile = None
+            self.close()
             _os.replace(tmpfile, self.datafile_path)
 
     def _save_feed_states(self, feeds, stream):

@@ -1,4 +1,5 @@
-# Copyright (C) 2004-2020 Aaron Swartz
+# Copyright (C) 2004-2021 Aaron Swartz
+#                         Alyssa Ross <hi@alyssa.is>
 #                         Anders Damsgaard <anders@adamsgaard.dk>
 #                         Andrey Zelenchuk <azelenchuk@parallels.com>
 #                         Andrey Zelenchuk <azelenchuk@plesk.com>
@@ -23,7 +24,10 @@
 #                         Thibaut Girka <thib@sitedethib.com>
 #                         W. Trevor King <wking@tremily.us>
 #                         Yannik Sembritzki <yannik@sembritzki.me>
+#                         auouymous <5005204+auouymous@users.noreply.github.com>
 #                         auouymous <au@qzx.com>
+#                         boyska <piuttosto@logorroici.org>
+#                         ryneeverett <ryneeverett@gmail.com>
 #
 # This file is part of rss2email.
 #
@@ -49,7 +53,7 @@ import html2text as _html2text
 
 class Config (_configparser.ConfigParser):
     def __init__(self, dict_type=_collections.OrderedDict,
-                 interpolation=_configparser.ExtendedInterpolation(),
+                 interpolation=None,
                  **kwargs):
         super(Config, self).__init__(
             dict_type=dict_type, interpolation=interpolation, **kwargs)
@@ -66,6 +70,10 @@ class Config (_configparser.ConfigParser):
             section, 'unicode-snob')
         _html2text.config.LINKS_EACH_PARAGRAPH = self.getboolean(
             section, 'links-after-each-paragraph')
+        _html2text.config.INLINE_LINKS = self.getboolean(
+            section, 'inline-links')
+        _html2text.config.WRAP_LINKS = self.getboolean(
+            section, 'wrap-links')
         # hack to prevent breaking the default in every existing config file
         body_width = self.getint(section, 'body-width')
         _html2text.config.BODY_WIDTH = 0 if body_width < 0 else 78 if body_width == 0 else body_width
@@ -148,10 +156,15 @@ CONFIG['DEFAULT'] = _collections.OrderedDict((
         # digest message before it is mailed.
         # Example: digest-post-process = 'rss2email.post_process.downcase downcase_message'
         ('digest-post-process', ''),
+        # The format for the Subject line.  Available attributes are
+        # 'feed', 'feed-name', 'feed-url', 'feed-title'.
+        ('subject-format', '{feed-title}'),
+
         ## HTML conversion
         # True: Send text/html messages when possible.
         # False: Convert HTML to plain text.
         ('html-mail', str(False)),
+        ('multipart-html', str(False)),
         # Optional CSS styling
         ('use-css', str(False)),
         ('css', (
@@ -186,10 +199,10 @@ CONFIG['DEFAULT'] = _collections.OrderedDict((
                 '  padding: 5px;\n'
                 '  margin-bottom: 0px;\n'
                 '}\n'
-                '#entry {\n'
+                '.entry {\n'
                 '  border: solid 4px #c3d9ff;\n'
                 '}\n'
-                '#body {\n'
+                '.body {\n'
                 '  margin-left: 5px;\n'
                 '  margin-right: 5px;\n'
                 '}\n')),
@@ -198,6 +211,10 @@ CONFIG['DEFAULT'] = _collections.OrderedDict((
         ('unicode-snob', str(False)),
         # Put the links after each paragraph instead of at the end.
         ('links-after-each-paragraph', str(False)),
+        # Use inline, rather than reference, for formatting images and links.
+        ('inline-links', str(True)),
+        # Wrap links according to body width.
+        ('wrap-links', str(True)),
         # Wrap long lines at position.
         # Any negative value for no wrapping, 0 for 78 width (compatibility), or any positive width.
         ('body-width', str(0)),

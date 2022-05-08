@@ -116,13 +116,13 @@ class TestEmails(unittest.TestCase, metaclass=TestEmailsMeta):
             text = regexp.sub(replacement, text)
         return text
 
-    def run_single_test(self, dirname=None, config_path=None, force=False):
+    def run_single_test(self, dirname=None, config_path=None):
         if dirname is None:
             dirname = _os.path.dirname(config_path)
         if config_path is None:
             _rss2email.LOG.info('testing {}'.format(dirname))
             for config_path in _glob.glob(_os.path.join(dirname, '*.config')):
-                self.run_single_test(dirname=dirname, config_path=config_path, force=force)
+                self.run_single_test(dirname=dirname, config_path=config_path)
             return
         feed_path = _glob.glob(_os.path.join(dirname, 'feed.*'))[0]
 
@@ -131,16 +131,22 @@ class TestEmails(unittest.TestCase, metaclass=TestEmailsMeta):
         config.read_string(self.BASE_CONFIG_STRING)
         read_paths = config.read([config_path])
         feed = _rss2email_feed.Feed(name='test', url=Path(feed_path).as_posix(), config=config)
-        expected_path = config_path.replace('config', 'expected')
-        with open(expected_path, 'r') as f:
-            expected = self.clean_result(f.read())
         feed._send = TestEmails.Send()
         feed.run()
         generated = feed._send.as_string()
-        if force:
-            with open(expected_path, 'w') as f:
-                f.write(generated)
         generated = self.clean_result(generated)
+
+        expected_path = config_path.replace('config', 'expected')
+        if not _os.path.exists(expected_path):
+            if _os.environ.get('FORCE_TESTDATA_CREATION', '') == '1':
+                with open(expected_path, 'w') as f:
+                    f.write(generated)
+                raise ValueError('missing expected test data, now created')
+            else:
+                raise ValueError('missing test; set FORCE_TESTDATA_CREATION=1 to create')
+        else:
+            with open(expected_path, 'r') as f:
+                expected = f.read()
         if generated != expected:
             diff_lines = _difflib.unified_diff(
                 expected.splitlines(), generated.splitlines(),
@@ -183,6 +189,19 @@ def webserver_for_test_fetch(queue, num_requests, wait_time):
                 return
             start = end
         queue.put("ok")
+    finally:
+        httpd.server_close()
+
+def webserver_for_test_if_fetch(queue, timeout):
+    """Spawn a webserver for `timeout` seconds"""
+    httpd = http.server.HTTPServer(('', 0), NoLogHandler)
+    httpd.timeout = timeout
+    try:
+        port = httpd.server_address[1]
+        queue.put(port)
+
+        httpd.handle_request()
+        queue.put("done")
     finally:
         httpd.server_close()
 
@@ -262,6 +281,28 @@ class TestFetch(unittest.TestCase):
                                                   "save feed data" in previous_line
                     previous_line = line
             self.assertTrue(finish_precedes_acquire)
+
+    def test_only_new(self):
+        "Add and fetch contents"
+
+        standard_cfg = """[DEFAULT]
+        to = example@example.com"""
+
+        queue = multiprocessing.Queue()
+        webserver_proc = multiprocessing.Process(target=webserver_for_test_if_fetch, args=(queue, 10))
+        webserver_proc.start()
+        port = queue.get()
+
+        with ExecContext(standard_cfg) as ctx:
+            ctx.call("add", '--only-new', 'test', 'http://127.0.0.1:{port}/disqus/feed.rss'.format(port = port))
+            # check if data is written
+            self.assertTrue(_os.path.exists(ctx.data_path))
+            with ctx.data_path.open('r') as f:
+                content = json.load(f)
+                # check if entries in seen
+                self.assertIn("seen", content["feeds"][0])
+        self.assertEqual(queue.get(), "done")
+
 
 def webserver_for_test_send(queue):
     httpd = http.server.HTTPServer(('', 0), NoLogHandler)

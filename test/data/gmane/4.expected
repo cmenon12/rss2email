@@ -1,7 +1,7 @@
 SENT BY: "gmane.mail.rss2email: W. Trevor King" <user@rss2email.invalid>
+Content-Type: multipart/alternative; boundary="===============...=="
 MIME-Version: 1.0
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
 From: "gmane.mail.rss2email: W. Trevor King" <user@rss2email.invalid>
 To: a@b.com
 Subject: Re: new maintainer and mailing list for rss2email
@@ -13,6 +13,11 @@ List-Post: NO (posting not allowed on this list)
 X-RSS-Feed: data/gmane/feed.rss
 X-RSS-ID: http://permalink.gmane.org/gmane.mail.rss2email/1
 X-RSS-URL: http://permalink.gmane.org/gmane.mail.rss2email/1
+
+--===============...==
+Content-Type: text/html; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
 
 <!DOCTYPE html>
 <html>
@@ -60,11 +65,57 @@ Done: https://github.com/rss2email/rss2email
 </body>
 </html>
 
+--===============...==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+
+# [Re: new maintainer and mailing list for
+rss2email](http://permalink.gmane.org/gmane.mail.rss2email/1)
+
+    
+    
+    Alrighty, this is the first email on the list and also my first
+    production mlmmj list, so I've CCed you both directly.  Etienne, let
+    me know if you get the direct email but not the list email, in which
+    case I'll try and figure out what I've miss-configured ;).  Lindsey,
+    I'll direct future rss2email stuff to my new list, so subscribe if
+    you're interested.
+    
+    On Mon, Nov 12, 2012 at 06:17:50PM +0100, Etienne Millon wrote:
+    
+    Wonderful.  Let me know if you come up with anything during a
+    test-drive, and I'll get it in before the 3.0 release.
+    
+    
+    The 2.x config format is pure Python, which means the users can do
+    whatever they want there (including monkey-patching urllib2, changing
+    the rss2email version number, etc.).  It's hard to imagine a robust
+    way to migrate everything a user may have done in there.
+    
+    
+    If you want to take a stab at it, I'll be happy to add it to a contrib
+    directory :).
+    
+    
+    Great :).
+    
+    On Mon, Nov 12, 2012 at 01:48:13PM -0500, W. Trevor King wrote:
+    
+    Done: https://github.com/rss2email/rss2email
+    
+    
+
+URL: <http://permalink.gmane.org/gmane.mail.rss2email/1>
+
+
+--===============...==--
+
 
 SENT BY: "gmane.mail.rss2email: Etienne Millon" <user@rss2email.invalid>
+Content-Type: multipart/alternative; boundary="===============...=="
 MIME-Version: 1.0
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
 From: "gmane.mail.rss2email: Etienne Millon" <user@rss2email.invalid>
 To: a@b.com
 Subject: Re: new maintainer and mailing list for rss2email
@@ -76,6 +127,11 @@ List-Post: NO (posting not allowed on this list)
 X-RSS-Feed: data/gmane/feed.rss
 X-RSS-ID: http://permalink.gmane.org/gmane.mail.rss2email/2
 X-RSS-URL: http://permalink.gmane.org/gmane.mail.rss2email/2
+
+--===============...==
+Content-Type: text/html; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
 
 <!DOCTYPE html>
 <html>
@@ -113,11 +169,47 @@ mailing list (git send-email style) ?
 </body>
 </html>
 
+--===============...==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+
+# [Re: new maintainer and mailing list for
+rss2email](http://permalink.gmane.org/gmane.mail.rss2email/2)
+
+    
+    
+    * W. Trevor King <wking-vJI2gpByivqcqzYg7KEe8g< at >public.gmane.org> [121112 23:18]:
+    
+    It seems to work, though it may have been grouped together with my
+    MDA. I'll tell you if I don't receive a mail where I'm not CCed.
+    
+    
+    We're finalizing a release ATM, so it will be the perfect time to try
+    a new rss2email release in a couple of months.
+    
+    
+    The idea is more to migrate the low hanging fruits (maybe 95% of
+    users) so that they don't lose their config. I was thinking to just
+    eval() the config file and output the relevant variables to the new
+    format. We'll see how it turns out :)
+    
+    
+    Do you prefer taking pull requests there or as a discussion on the
+    mailing list (git send-email style) ?
+    
+    
+
+URL: <http://permalink.gmane.org/gmane.mail.rss2email/2>
+
+
+--===============...==--
+
 
 SENT BY: "gmane.mail.rss2email: W. Trevor King" <user@rss2email.invalid>
+Content-Type: multipart/alternative; boundary="===============...=="
 MIME-Version: 1.0
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
 From: "gmane.mail.rss2email: W. Trevor King" <user@rss2email.invalid>
 To: a@b.com
 Subject: Re: new maintainer and mailing list for rss2email
@@ -129,6 +221,11 @@ List-Post: NO (posting not allowed on this list)
 X-RSS-Feed: data/gmane/feed.rss
 X-RSS-ID: http://permalink.gmane.org/gmane.mail.rss2email/3
 X-RSS-URL: http://permalink.gmane.org/gmane.mail.rss2email/3
+
+--===============...==
+Content-Type: text/html; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
 
 <!DOCTYPE html>
 <html>
@@ -150,11 +247,30 @@ send-email style, although I'll accept anything ;).
 </body>
 </html>
 
+--===============...==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+
+# [Re: new maintainer and mailing list for
+rss2email](http://permalink.gmane.org/gmane.mail.rss2email/3)
+
+    
+    
+    send-email style, although I'll accept anything ;).
+    
+    
+
+URL: <http://permalink.gmane.org/gmane.mail.rss2email/3>
+
+
+--===============...==--
+
 
 SENT BY: "gmane.mail.rss2email: Etienne Millon" <user@rss2email.invalid>
+Content-Type: multipart/alternative; boundary="===============...=="
 MIME-Version: 1.0
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
 From: "gmane.mail.rss2email: Etienne Millon" <user@rss2email.invalid>
 To: a@b.com
 Subject: Re: new maintainer and mailing list for rss2email
@@ -166,6 +282,11 @@ List-Post: NO (posting not allowed on this list)
 X-RSS-Feed: data/gmane/feed.rss
 X-RSS-ID: http://permalink.gmane.org/gmane.mail.rss2email/4
 X-RSS-URL: http://permalink.gmane.org/gmane.mail.rss2email/4
+
+--===============...==
+Content-Type: text/html; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
 
 <!DOCTYPE html>
 <html>
@@ -190,11 +311,34 @@ Also, confirming that the mailing list works.
 </body>
 </html>
 
+--===============...==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+
+# [Re: new maintainer and mailing list for
+rss2email](http://permalink.gmane.org/gmane.mail.rss2email/4)
+
+    
+    
+    * W. Trevor King <wking-vJI2gpByivqcqzYg7KEe8g< at >public.gmane.org> [121113 13:21]:
+    
+    Ack.
+    
+    Also, confirming that the mailing list works.
+    
+    
+
+URL: <http://permalink.gmane.org/gmane.mail.rss2email/4>
+
+
+--===============...==--
+
 
 SENT BY: "gmane.mail.rss2email: W. Trevor King" <user@rss2email.invalid>
+Content-Type: multipart/alternative; boundary="===============...=="
 MIME-Version: 1.0
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
 From: "gmane.mail.rss2email: W. Trevor King" <user@rss2email.invalid>
 To: a@b.com
 Subject: split massive package into modules
@@ -206,6 +350,11 @@ List-Post: NO (posting not allowed on this list)
 X-RSS-Feed: data/gmane/feed.rss
 X-RSS-ID: http://permalink.gmane.org/gmane.mail.rss2email/5
 X-RSS-URL: http://permalink.gmane.org/gmane.mail.rss2email/5
+
+--===============...==
+Content-Type: text/html; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
 
 <!DOCTYPE html>
 <html>
@@ -228,4 +377,26 @@ https://github.com/rss2email/rss2email/commit/066602efa088b4a89d67e23011613b4459
 </div>
 </body>
 </html>
+
+--===============...==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+
+# [split massive package into
+modules](http://permalink.gmane.org/gmane.mail.rss2email/5)
+
+    
+    
+    I just split the 1769-line rss2email.py module into a more manageable
+    package with sub-modules:
+    
+    https://github.com/rss2email/rss2email/commit/066602efa088b4a89d67e23011613b4459db3c92
+    
+    
+
+URL: <http://permalink.gmane.org/gmane.mail.rss2email/5>
+
+
+--===============...==--
 

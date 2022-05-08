@@ -1,47 +1,47 @@
 [[package]]
-category = "main"
-description = "Universal feed parser, handles RSS 0.9x, RSS 1.0, RSS 2.0, CDF, Atom 0.3, and Atom 1.0 feeds"
 name = "feedparser"
+version = "6.0.5"
+description = "Universal feed parser, handles RSS 0.9x, RSS 1.0, RSS 2.0, CDF, Atom 0.3, and Atom 1.0 feeds"
+category = "main"
 optional = false
 python-versions = ">=3.6"
-version = "6.0.1"
 
 [package.dependencies]
 sgmllib3k = "*"
 
 [[package]]
-category = "main"
-description = "Turn HTML into equivalent Markdown-structured text."
 name = "html2text"
+version = "2020.1.16"
+description = "Turn HTML into equivalent Markdown-structured text."
+category = "main"
 optional = false
 python-versions = ">=3.5"
-version = "2020.1.16"
 
 [[package]]
-category = "main"
-description = "Py3k port of sgmllib."
 name = "sgmllib3k"
+version = "1.0.0"
+description = "Py3k port of sgmllib."
+category = "main"
 optional = false
 python-versions = "*"
-version = "1.0.0"
 
 [[package]]
-category = "dev"
-description = "Automatically update copyright blurbs in versioned source."
 name = "update-copyright"
+version = "0.6.2"
+description = "Automatically update copyright blurbs in versioned source."
+category = "dev"
 optional = false
 python-versions = "*"
-version = "0.6.2"
 
 [metadata]
-content-hash = "9886ddfe85969df311e501044b12156082b2a58a9aa1db74b9effa92952bfdc1"
-lock-version = "1.0"
+lock-version = "1.1"
 python-versions = "^3.6"
+content-hash = "90cb7e86a04cf6708485bd4c8c9c11c369898e17ffdb580897ca42ac4bfcc64e"
 
 [metadata.files]
 feedparser = [
-    {file = "feedparser-6.0.1-py2.py3-none-any.whl", hash = "sha256:c9b436334258e718e224c5ef8a78088557e0d0382506360f702de10667ffde32"},
-    {file = "feedparser-6.0.1.tar.gz", hash = "sha256:6ca88edcaa43f428345968df903a87f020843eda5e28d7ea24a612158d61e74c"},
+    {file = "feedparser-6.0.5-py3-none-any.whl", hash = "sha256:f4dfcc94bb85fd44bb27089f696cdd225d6c10b3ab25a9ddaa8257b692b6a224"},
+    {file = "feedparser-6.0.5.tar.gz", hash = "sha256:cae320004d904a12e33b1b10bd63766bc2823eec94e03b802fbb228d820838d9"},
 ]
 html2text = [
     {file = "html2text-2020.1.16-py3-none-any.whl", hash = "sha256:c7c629882da0cf377d66f073329ccf34a12ed2adf0169b9285ae4e63ef54c82b"},

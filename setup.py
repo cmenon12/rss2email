@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2020 Adam Mokhtari <2553423+uutari@users.noreply.github.com>
+# Copyright (C) 2012-2021 Adam Mokhtari <2553423+uutari@users.noreply.github.com>
 #                         Andrey Zelenchuk <azelenchuk@plesk.com>
 #                         Arun Persaud <apersaud@lbl.gov>
 #                         Léo Gaspard <leo@gaspard.io>
@@ -6,6 +6,8 @@
 #                         Profpatsch <mail@profpatsch.de>
 #                         Steven Siloti <ssiloti@gmail.com>
 #                         W. Trevor King <wking@tremily.us>
+#                         auouymous <5005204+auouymous@users.noreply.github.com>
+#                         auouymous <au@qzx.com>
 #
 # This file is part of rss2email.
 #
@@ -64,7 +66,7 @@ setuptools.setup(
     scripts=['r2e'],
     provides=['rss2email'],
     install_requires=[
-        'feedparser>=6.0.0',
+        'feedparser>=6.0.5',
         'html2text>=2020.1.16',
         ],
     )
