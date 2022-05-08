@@ -130,12 +130,20 @@ def download_article(url: str, title: str) -> Tuple[MIMEBase, MIMEBase]:
     my_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
     pdf_options = {
         "page-size": "A4",
+        "images": "",
+        "no-pdf-compression": "",
+        "enable-javascript": "",
+        "javascript-delay": "3000",
+        "margin-top": "14.1mm",
+        "margin-bottom": "14.1mm",
         "header-left": "[title]",
         "header-right": "Page [page] of [toPage]",
         "footer-left": url,
-        "footer-right": f"[date] [time] {str(my_tz)}"
+        "footer-right": f"[date] [time] {str(my_tz)}",
+        "header-font-size": "6",
+        "footer-font-size": "6"
     }
-    pdf = pdfkit.from_url(url, False)
+    pdf = pdfkit.from_url(url, False, options=pdf_options)
 
     # Convert HTML to an attachment
     html_part = MIMEBase('application', "octet-stream")
