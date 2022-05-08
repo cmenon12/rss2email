@@ -839,7 +839,10 @@ class Feed (object):
                     ])
 
             lines.append('<br><span class="disclaimer">This email was sent '
-                         'automatically by a computer program (rss2email). '
+                         'automatically by a computer program (<a '
+                         'target="_blank" '
+                         'href="https://github.com/cmenon12/rss2email">'
+                         'cmenon12/rss2email</a>). '
                          'If you want to leave some feedback then please '
                          'reply directly to it.</span><br><br>')
 
