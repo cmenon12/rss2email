@@ -509,7 +509,7 @@ class Feed (object):
         new_state['hash'] = new_hash
 
         sender = self._get_entry_email(parsed=parsed, entry=entry)
-        subject = self._get_entry_subject(entry=entry)
+        subject = self._get_entry_title(entry=entry)
 
         message_id = '<{0}@{1}>'.format(_uuid.uuid4(), platform.node())
         in_reply_to = old_state.get('message_id') if old_state is not None else None
@@ -669,16 +669,6 @@ class Feed (object):
             data['publisher'] = feed.publisher_detail.name
         name = self.name_format.format(**data)
         name = name.replace('\n', ' ').strip()
-        return _html.unescape(name)
-
-    def _get_entry_subject(self, entry):
-        data = {
-            'feed': self,
-            'feed-name': self.name,
-            'feed-url': self.url,
-            'feed-title': self._get_entry_title(entry),
-            }
-        name = self.subject_format.format(**data)
         return _html.unescape(name)
 
     def _validate_email(self, email, default=None):
