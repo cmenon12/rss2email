@@ -35,11 +35,13 @@
 """
 
 import email as _email
+from email import encoders
 from email.charset import Charset as _Charset
 import email.encoders as _email_encoders
 from email.generator import BytesGenerator as _BytesGenerator
 import email.header as _email_header
 from email.header import Header as _Header
+from email.mime.base import MIMEBase
 from email.mime.text import MIMEText as _MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.utils import formataddr as _formataddr
@@ -55,8 +57,13 @@ import subprocess as _subprocess
 import sys as _sys
 import time as _time
 import os as _os
+import datetime
+from typing import Tuple
+
+import pdfkit
 
 import html2text
+import requests
 
 from . import LOG as _LOG
 from . import config as _config
@@ -113,7 +120,49 @@ def message_add_plain_multipart(guid, message, html):
         return message
     return message
 
-def get_message(sender, recipient, subject, body, content_type,
+
+def download_article(url: str, title: str) -> Tuple[MIMEBase, MIMEBase]:
+    """Download the URL and return the HTML and PDF."""
+
+    # Get the HTML and PDF
+    html_response = requests.get(url, allow_redirects=True)
+    html_response.raise_for_status()
+    my_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+    pdf_options = {
+        "page-size": "A4",
+        "images": "",
+        "no-pdf-compression": "",
+        "enable-javascript": "",
+        "javascript-delay": "3000",
+        "margin-top": "14.1mm",
+        "margin-bottom": "14.1mm",
+        "header-left": "[title]",
+        "header-right": "Page [page] of [toPage]",
+        "footer-left": url,
+        "footer-right": f"[date] [time] {str(my_tz)}",
+        "header-font-size": "6",
+        "footer-font-size": "6"
+    }
+    pdf = pdfkit.from_url(url, False, options=pdf_options)
+
+    # Convert HTML to an attachment
+    html_part = MIMEBase('application', "octet-stream")
+    html_part.set_payload(html_response.content)
+    encoders.encode_base64(html_part)
+    html_part.add_header("Content-Disposition", f"attachment; filename=\"{title}\".html")
+    html_part.add_header("Content-Description", f"{title}.html")
+
+    # Convert PDF to an attachment
+    pdf_part = MIMEBase("application", "pdf")
+    pdf_part.set_payload(pdf)
+    encoders.encode_base64(pdf_part)
+    pdf_part.add_header("Content-Disposition", f"attachment; filename=\"{title}\".pdf")
+    pdf_part.add_header("Content-Description", f"{title}.pdf")
+
+    return html_part, pdf_part
+
+
+def get_message(sender, recipient, subject, body, content_type, url,
                 extra_headers=None, config=None, section='DEFAULT'):
     """Generate a `Message` instance.
 
@@ -162,11 +211,16 @@ def get_message(sender, recipient, subject, body, content_type,
     subject_encoding = guess_encoding(subject, encodings)
     body_encoding = guess_encoding(body, encodings)
 
-    # Create the message ('plain' stands for Content-Type: text/plain)
-    message = _MIMEText(body, content_type, body_encoding)
+    # Create the message
+    message = MIMEMultipart("alternative")
+    body = _MIMEText(body, content_type, body_encoding)
+    message.attach(body)
     message['From'] = config.get(section, 'from')
     message['To'] = config.get(section, 'to')
     message['Subject'] = _Header(subject, subject_encoding)
+    for attachment in download_article(url, subject):
+        message.attach(attachment)
+
     if config.getboolean(section, 'use-8bit'):
         del message['Content-Transfer-Encoding']
         charset = _Charset(body_encoding)
